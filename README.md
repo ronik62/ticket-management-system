@@ -154,7 +154,7 @@ When a ticket is created:
 
 ## 📸 Screenshots
 
-Add screenshots in the `screenshots` folder.
+
 
 * Create Ticket API
 * Get All Tickets API
