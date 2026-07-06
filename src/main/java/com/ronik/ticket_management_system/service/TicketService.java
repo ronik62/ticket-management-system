@@ -1,7 +1,7 @@
 package com.ronik.ticket_management_system.service;
 
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,15 +43,15 @@ public class TicketService {
         return responseDTO;
     }
 
-    private List<TicketResponseDTO> mapToResponseDTOList(List<Ticket> tickets){
-        List<TicketResponseDTO> responseDTOs = new ArrayList<>();
+    // private List<TicketResponseDTO> mapToResponseDTOList(List<Ticket> tickets){
+    //     List<TicketResponseDTO> responseDTOs = new ArrayList<>();
 
-        for(Ticket ticket: tickets){
-            responseDTOs.add(mapToResponseDTO(ticket));
-        }
+    //     for(Ticket ticket: tickets){
+    //         responseDTOs.add(mapToResponseDTO(ticket));
+    //     }
 
-        return responseDTOs;
-    }
+    //     return responseDTOs;
+    // }
 
     // create a method to save a ticket
     public TicketResponseDTO createTicket(TicketRequestDTO requestDTO){
