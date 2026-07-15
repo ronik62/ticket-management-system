@@ -40,27 +40,95 @@ public class TicketServiceTest {
     @InjectMocks
     private TicketService ticketService;
 
+    /*
+        * Helper methods to create reusable test objects.
+ *
+        * Why?
+        * Earlier, every test was creating the same Ticket and TicketRequestDTO
+        * objects using multiple setter calls. This resulted in duplicated code.
+        *
+        * Instead of repeating the same object creation in every test,
+        * we create it once here and reuse it.
+        *
+        * This makes tests:
+        * 1. Shorter
+        * 2. Easier to read
+        * 3. Easier to maintain
+        *
+        * If a default value changes in future,
+        * we only update it in one place.
+    */
+
+    private Ticket createExistingTicket() {
+
+        Ticket ticket = new Ticket();
+
+        ticket.setId(1L);
+        ticket.setRequesterName("Ronik");
+        ticket.setSubject("VPN Issue");
+        ticket.setDescription("Unable to connect");
+        ticket.setPriority(Priority.P3);
+        ticket.setStatus(Status.OPEN);
+        ticket.setTeamAssigned("Service Desk");
+
+        return ticket;
+    }
+
+    private Ticket createUpdatedTicket() {
+
+        Ticket ticket = new Ticket();
+
+        ticket.setPriority(Priority.P1);
+        ticket.setStatus(Status.CLOSED);
+        ticket.setTeamAssigned("L2 Network");
+
+        return ticket;
+    }
+
+    private TicketRequestDTO createTicketRequestDTO() {
+
+        TicketRequestDTO requestDTO = createRequestWithoutPriority();
+        requestDTO.setPriority(Priority.P1);
+
+        return requestDTO;
+    }
+
+
+    private TicketRequestDTO createRequestWithoutPriority() {
+
+        TicketRequestDTO requestDTO = new TicketRequestDTO();
+
+        requestDTO.setRequesterName("Ronik");
+        requestDTO.setSubject("VPN Issue");
+        requestDTO.setDescription("Unable to connect");
+
+        return requestDTO;
+    }
+
+    private Ticket createSavedTicket() {
+
+        Ticket ticket = new Ticket();
+
+        ticket.setId(1L);
+        ticket.setRequesterName("Ronik");
+        ticket.setSubject("VPN Issue");
+        ticket.setDescription("Unable to connect");
+        ticket.setPriority(Priority.P1);
+        ticket.setStatus(Status.OPEN);
+        ticket.setTeamAssigned("Service Desk");
+        ticket.setCreatedAt(LocalDateTime.now());
+
+        return ticket;
+    }
+
+
     @Test
     void shouldCreateTicketSuccessfully(){
 
         //as we are not getting spring boot application context we need to manually create requestdto 
-        TicketRequestDTO requestDTO = new TicketRequestDTO();
-        
-        requestDTO.setRequesterName("Ronik");
-        requestDTO.setSubject("VPN Issue");
-        requestDTO.setDescription("Unable to connect");
-        requestDTO.setPriority(Priority.P1);
+        TicketRequestDTO requestDTO = createTicketRequestDTO();
 
-        Ticket savedTicket = new Ticket();
-
-        savedTicket.setId(1L);
-        savedTicket.setRequesterName("Ronik");
-        savedTicket.setSubject("VPN Issue");
-        savedTicket.setDescription("Unable to connect");
-        savedTicket.setPriority(Priority.P1);
-        savedTicket.setStatus(Status.OPEN);
-        savedTicket.setTeamAssigned("Service Desk");
-        savedTicket.setCreatedAt(LocalDateTime.now());
+        Ticket savedTicket = createSavedTicket();
 
         when(ticketRepository.save(any(Ticket.class))).thenReturn(savedTicket);
 
@@ -80,11 +148,7 @@ public class TicketServiceTest {
     @Test
     void shouldAssignDefaultPriorityWhenPriorityIsNull(){
         
-        TicketRequestDTO requestDTO = new TicketRequestDTO();
-
-        requestDTO.setRequesterName("Ronik");
-        requestDTO.setSubject("VPN Issue");
-        requestDTO.setDescription("Unable to connect");
+        TicketRequestDTO requestDTO = createRequestWithoutPriority();
 
         Ticket savedTicket = new Ticket();
 
@@ -103,13 +167,7 @@ public class TicketServiceTest {
     @Test
     void shouldReturnTicketWhenTicketExists(){
 
-        Ticket ticket = new Ticket();
-
-        ticket.setId(1L);
-        ticket.setRequesterName("Ronik");
-        ticket.setSubject("VPN Issue");
-        ticket.setPriority(Priority.P3);
-        ticket.setStatus(Status.OPEN);
+        Ticket ticket = createExistingTicket();
 
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
 
@@ -137,13 +195,8 @@ public class TicketServiceTest {
 
     @Test
     void shouldDeleteTicketSuccessfully(){
-        Ticket ticket = new Ticket();
-
-        ticket.setId(1L);
-        ticket.setRequesterName("Ronik");
-        ticket.setSubject("VPN Issue");
+        Ticket ticket = createExistingTicket();
         ticket.setPriority(Priority.P1);
-        ticket.setStatus(Status.OPEN);
 
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
 
@@ -166,4 +219,49 @@ public class TicketServiceTest {
 
         verify(ticketRepository,never()).delete(any(Ticket.class));
     }
+
+    @Test
+    void shouldUpdateTicketSuccessfully(){
+
+        Ticket existingTicket = createExistingTicket();
+
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(existingTicket));
+
+        Ticket updatedTicket = createUpdatedTicket();
+
+        ticketService.updateTicket(1L, updatedTicket);
+
+        verify(ticketRepository).findById(1L);
+
+        verify(ticketRepository).save(ticketCaptor.capture());
+
+        Ticket capturedTicket = ticketCaptor.getValue();
+
+        assertEquals(Priority.P1, capturedTicket.getPriority());
+        assertEquals(Status.CLOSED,capturedTicket.getStatus());
+        assertEquals("L2 Network",capturedTicket.getTeamAssigned());
+        assertEquals("Ronik",capturedTicket.getRequesterName());
+        assertEquals("VPN Issue",capturedTicket.getSubject());
+        assertEquals("Unable to connect", capturedTicket.getDescription());
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistingTicket(){
+
+        when(ticketRepository.findById(100L)).thenReturn(Optional.empty());
+
+        Ticket updatedTicket = new Ticket();
+
+        TicketNotFoundException exception = assertThrows(TicketNotFoundException.class, ()->ticketService.updateTicket(100L, updatedTicket));
+
+        assertEquals("Ticket not found by id 100", exception.getMessage());
+
+        verify(ticketRepository).findById(100L);
+
+        verify(ticketRepository,never()).save(any(Ticket.class));
+    }
+
+
+
 }
