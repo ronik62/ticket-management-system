@@ -1,10 +1,14 @@
 # 🎫 Ticket Management System
 
-A production-style RESTful Ticket Management System built with **Java**, **Spring Boot**, **Spring Data JPA**, and **PostgreSQL**. The application provides complete ticket lifecycle management with CRUD operations, pagination, sorting, dynamic filtering using JPA Specifications, validation, exception handling, and interactive API documentation using Swagger/OpenAPI.
+A production-style RESTful Ticket Management System built with **Java**, **Spring Boot**, **Spring Data JPA**, **Spring Security**, **JWT**, and **PostgreSQL**.
+
+The application provides complete ticket lifecycle management with CRUD operations, pagination, sorting, dynamic filtering using JPA Specifications, request validation, centralized exception handling, user registration, JWT-based authentication, protected REST APIs, and interactive API documentation using Swagger/OpenAPI.
 
 ---
 
 ## 🚀 Features
+
+### 🎫 Ticket Management
 
 - ✅ Create Ticket
 - ✅ Get All Tickets
@@ -12,13 +16,35 @@ A production-style RESTful Ticket Management System built with **Java**, **Sprin
 - ✅ Update Ticket
 - ✅ Update Ticket Status
 - ✅ Delete Ticket
+
+### 🔍 Data Retrieval
+
 - ✅ Pagination
 - ✅ Dynamic Sorting
 - ✅ Dynamic Filtering using JPA Specifications
+
+### 🔐 Authentication & Security
+
+- ✅ User Registration
+- ✅ BCrypt Password Hashing
+- ✅ User Login
+- ✅ Spring Security
+- ✅ Custom `UserDetailsService`
+- ✅ `AuthenticationManager`
+- ✅ JWT Token Generation
+- ✅ JWT Token Validation
+- ✅ JWT Authentication Filter
+- ✅ Protected REST APIs
+- ⏳ Role-Based Authorization
+
+### 🧩 Application Features
+
 - ✅ DTO Pattern
 - ✅ Bean Validation
 - ✅ Global Exception Handling
 - ✅ Swagger / OpenAPI Documentation
+- ✅ Unit Testing with JUnit 5
+- ✅ Mockito
 
 ---
 
@@ -28,6 +54,8 @@ A production-style RESTful Ticket Management System built with **Java**, **Sprin
 |------------|---------|
 | Java 17 | Programming Language |
 | Spring Boot | Backend Framework |
+| Spring Security | Authentication & Security |
+| JWT | Stateless Authentication |
 | Spring Data JPA | Database Access |
 | Hibernate | ORM |
 | PostgreSQL | Database |
@@ -35,204 +63,56 @@ A production-style RESTful Ticket Management System built with **Java**, **Sprin
 | Lombok | Reduce Boilerplate Code |
 | Jakarta Validation | Request Validation |
 | Swagger / OpenAPI | API Documentation |
+| JUnit 5 | Unit Testing |
+| Mockito | Mocking & Unit Testing |
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 src/main/java
 │
+├── config
+│   └── SecurityConfig.java
+│
 ├── controller
+│   ├── AuthController.java
+│   └── TicketController.java
+│
 ├── dto
+│   ├── LoginRequestDTO.java
+│   ├── LoginResponseDTO.java
+│   ├── UserRegistrationDTO.java
+│   ├── UserRegistrationResponseDTO.java
+│   └── ...
+│
 ├── entity
+│   ├── AppUser.java
+│   └── Ticket.java
+│
 ├── enums
+│   ├── Role.java
+│   ├── Priority.java
+│   └── ...
+│
 ├── exception
+│   └── GlobalExceptionHandler.java
+│
 ├── repository
+│   ├── AppUserRepository.java
+│   └── TicketRepository.java
+│
+├── security
+│   ├── CustomUserDetailsService.java
+│   └── JwtAuthenticationFilter.java
+│
 ├── service
+│   ├── AuthService.java
+│   ├── JwtService.java
+│   └── TicketService.java
+│
 ├── specifications
-└── TicketManagementSystemApplication
-```
-
----
-
-## 📌 REST API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/tickets` | Create a new ticket |
-| GET | `/api/tickets` | Get all tickets with pagination, sorting and filtering |
-| GET | `/api/tickets/{id}` | Get ticket by ID |
-| PUT | `/api/tickets/{id}` | Update ticket |
-| PUT | `/api/tickets/{id}/status` | Update ticket status |
-| DELETE | `/api/tickets/{id}` | Delete ticket |
-
----
-
-## 🔍 Filtering
-
-Filter tickets dynamically.
-
-Example:
-
-```http
-GET /api/tickets?status=OPEN&priority=P1&requesterName=Ronik
-```
-
----
-
-## 📄 Pagination
-
-Retrieve tickets page by page.
-
-Example:
-
-```http
-GET /api/tickets?page=0&size=5
-```
-
----
-
-## ↕️ Sorting
-
-Sort tickets by different fields.
-
-Newest tickets:
-
-```http
-GET /api/tickets?sortBy=createdAt&direction=desc
-```
-
-Sort by priority:
-
-```http
-GET /api/tickets?sortBy=priority&direction=asc
-```
-
-Supported sort fields:
-
-- createdAt
-- priority
-- status
-- requesterName
-
----
-
-## 📚 API Documentation
-
-Swagger UI
-
-```
-http://localhost:8080/swagger-ui/index.html
-```
-
-OpenAPI JSON
-
-```
-http://localhost:8080/v3/api-docs
-```
-
----
-
-## 🧪 Validation
-
-The application validates incoming requests using Jakarta Validation.
-
-Examples:
-
-- Requester name cannot be blank
-- Subject cannot be blank
-- Description cannot be blank
-- Priority is mandatory
-
----
-
-## ⚠️ Exception Handling
-
-Centralized exception handling using `@RestControllerAdvice`.
-
-Handles:
-
-- Ticket Not Found (404)
-- Validation Errors (400)
-- Invalid Sort Fields (400)
-- Invalid Request Parameters (400)
-
----
-
-## 🏗️ Architecture
-
-The project follows a layered architecture.
-
-```
-Controller
-      │
-      ▼
-Service
-      │
-      ▼
-Repository
-      │
-      ▼
-PostgreSQL
-```
-
----
-
-## 🧩 Design Patterns & Concepts Used
-
-- Layered Architecture
-- DTO Pattern
-- Repository Pattern
-- Dependency Injection
-- JPA Specifications
-- Pagination
-- Sorting
-- Bean Validation
-- Global Exception Handling
-- RESTful API Design
-
----
-
-## ▶️ Running the Project
-
-1. Clone the repository
-
-```bash
-git clone <repository-url>
-```
-
-2. Navigate to the project
-
-```bash
-cd ticket-management-system
-```
-
-3. Configure PostgreSQL in `application.properties`
-
-4. Run the application
-
-```bash
-mvn spring-boot:run
-```
-
----
-
-## 🚧 Upcoming Features
-
-- Unit Testing (JUnit 5)
-- Mockito
-- Spring Security
-- JWT Authentication
-- Microsoft Teams Notification for P1 & P2 Tickets
-- Scheduled Ticket Escalation
-- Docker Support
-- Deployment
-
----
-
-## 👨‍💻 Author
-
-**Ronik Kumbhar**
-
-Java Backend Developer | Spring Boot | REST APIs | PostgreSQL
+│   └── TicketSpecification.java
+│
+└── TicketManagementSystemApplication.java
