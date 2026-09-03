@@ -3,6 +3,7 @@ package com.ronik.ticket_management_system.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -27,9 +28,19 @@ public class GlobalExceptionHandler {
         return ex.getMessage();
     }
 
+    // @ExceptionHandler(HttpMessageNotReadableException.class)
+    // public String handleHttpMessageNotReadable(HttpMessageNotReadableException ex){
+    //     return "Invalid request body";
+    // }
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public String handleHttpMessageNotReadable(HttpMessageNotReadableException ex){
-        return "Invalid priority: Allowed p1,p2,p3,p4";
+    public ResponseEntity<String> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException ex) {
+
+        ex.printStackTrace();
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -37,4 +48,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
+    
 }
